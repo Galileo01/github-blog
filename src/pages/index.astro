@@ -1,11 +1,90 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import ProjectsSection from '../components/ProjectsSection.astro';
+import BlogCard from '../components/BlogCard.astro';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const recentPosts = await getCollection('blog');
+recentPosts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const latestPosts = recentPosts.slice(0, 3);
 ---
 
-<Layout>
-	<Welcome />
-</Layout>
+<BaseLayout title="Mark — 技术与思考" description="个人博客，分享技术探索与项目实践">
+  <!-- Hero Section -->
+  <section class="py-16 sm:py-24">
+    <div class="flex flex-col items-center text-center">
+      <div class="mb-6 h-24 w-24 overflow-hidden rounded-full border-2 border-border">
+        <img
+          src="https://avatars.githubusercontent.com/u/47887657?v=4"
+          alt="Mark"
+          class="h-full w-full object-cover"
+          width="96"
+          height="96"
+        />
+      </div>
+      <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">
+        Hi, I'm <span class="text-primary">Mark</span>
+      </h1>
+      <p class="mt-4 max-w-2xl text-lg text-muted-foreground">
+        前端工程师 · Rust 探索者 · 开源爱好者
+      </p>
+      <p class="mt-2 text-sm text-muted-foreground">
+        从 Web 前端到系统编程，持续探索技术的边界
+      </p>
+      <div class="mt-8 flex gap-4">
+        <a
+          href="https://github.com/Galileo01"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90 transition-colors"
+        >
+          GitHub
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tech Stack -->
+  <section class="py-12">
+    <h2 class="text-2xl font-bold tracking-tight mb-6">技术栈</h2>
+    <div class="flex flex-wrap gap-2">
+      <span class="rounded-full border px-3 py-1 text-sm bg-secondary/50">TypeScript</span>
+      <span class="rounded-full border px-3 py-1 text-sm bg-secondary/50">JavaScript</span>
+      <span class="rounded-full border px-3 py-1 text-sm bg-secondary/50">React</span>
+      <span class="rounded-full border px-3 py-1 text-sm bg-secondary/50">Vue</span>
+      <span class="rounded-full border px-3 py-1 text-sm bg-secondary/50">Rust</span>
+      <span class="rounded-full border px-3 py-1 text-sm bg-secondary/50">Node.js</span>
+      <span class="rounded-full border px-3 py-1 text-sm bg-secondary/50">Formily</span>
+      <span class="rounded-full border px-3 py-1 text-sm bg-secondary/50">Astro</span>
+      <span class="rounded-full border px-3 py-1 text-sm bg-secondary/50">Tailwind CSS</span>
+    </div>
+  </section>
+
+  <!-- Recent Posts -->
+  {latestPosts.length > 0 && (
+    <section class="py-12">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-bold tracking-tight">最近文章</h2>
+        <a href="/blog" class="text-sm text-muted-foreground hover:text-foreground transition-colors">
+          查看全部 →
+        </a>
+      </div>
+      <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {latestPosts.map((post) => (
+          <BlogCard post={post} />
+        ))}
+      </div>
+    </section>
+  )}
+
+  <!-- Selected Projects -->
+  <section class="py-12">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-2xl font-bold tracking-tight">精选项目</h2>
+      <a href="/projects" class="text-sm text-muted-foreground hover:text-foreground transition-colors">
+        查看全部 →
+      </a>
+    </div>
+    <ProjectsSection featured />
+  </section>
+</BaseLayout>

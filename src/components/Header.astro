@@ -1,0 +1,60 @@
+---
+import ThemeToggle from './ThemeToggle.tsx';
+---
+
+<header class="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+  <div class="mx-auto flex h-16 max-w-4xl items-center justify-between px-4 sm:px-6 lg:px-8">
+    <nav class="flex items-center gap-8">
+      <a href="/" class="text-lg font-semibold tracking-tight hover:text-primary/80 transition-colors">
+        Mark
+      </a>
+      <div class="hidden sm:flex items-center gap-6">
+        <a href="/" class="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+          首页
+        </a>
+        <a href="/blog" class="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+          博客
+        </a>
+        <a href="/projects" class="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+          项目
+        </a>
+      </div>
+    </nav>
+    <div class="flex items-center gap-2">
+      <a
+        href="/rss.xml"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        title="RSS 订阅"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-rss"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>
+        <span class="hidden sm:inline">RSS</span>
+      </a>
+      <a
+        href="https://github.com/Galileo01"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        title="GitHub"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-github"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+        <span class="hidden sm:inline">GitHub</span>
+      </a>
+      <ThemeToggle client:idle />
+    </div>
+  </div>
+
+  <!-- Mobile Nav -->
+  <nav class="flex sm:hidden items-center justify-center gap-6 border-t border-border/40 py-2 px-4">
+    <a href="/" class="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+      首页
+    </a>
+    <a href="/blog" class="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+      博客
+    </a>
+    <a href="/projects" class="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+      项目
+    </a>
+  </nav>
+</header>

@@ -1,0 +1,86 @@
+---
+import fs from 'node:fs';
+import path from 'node:path';
+
+interface Project {
+  name: string;
+  description: string;
+  language: string;
+  stars: number;
+  forks: number;
+  pinned?: boolean;
+  url: string;
+}
+
+export interface Props {
+  limit?: number;
+  /** 只展示 Pinned 仓库；如无 Pinned 则降级按 Star 排序 */
+  featured?: boolean;
+}
+
+const { limit, featured } = Astro.props;
+
+let projects: Project[] = [];
+const dataPath = path.resolve('src/data/projects.json');
+
+try {
+  const raw = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
+  const allProjects: Project[] = (raw.projects || []);
+
+  if (featured) {
+    // 精选模式：取 Pinned 仓库；如无则降级为 Star 排序 Top 6
+    const pinnedList = allProjects.filter((p) => p.pinned);
+    projects = pinnedList.length > 0
+      ? pinnedList
+      : allProjects.filter((p) => p.description && p.description !== '');
+  } else {
+    // 普通模式：过滤掉无描述的，全部展示
+    projects = allProjects.filter((p) => p.description && p.description !== '');
+  }
+
+  // 排序：Pinned 的在 featured 模式下保持原有顺序（按 stars 排）
+  // 其他情况按 stars 降序
+  if (!featured || projects.every((p) => p.pinned)) {
+    projects.sort((a, b) => b.stars - a.stars);
+  }
+
+  if (limit && !featured) {
+    projects = projects.slice(0, limit);
+  }
+} catch {
+  // 数据文件不存在时静默降级
+}
+---
+
+{projects.length > 0 ? (
+  <div class="grid gap-6 sm:grid-cols-2">
+    {projects.map((project) => (
+      <a
+        href={project.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="group rounded-lg border border-border bg-card p-5 shadow-sm transition-all hover:shadow-md"
+      >
+        <h3 class="font-semibold tracking-tight group-hover:text-primary transition-colors">
+          {project.name}
+        </h3>
+        {project.description && (
+          <p class="mt-2 text-sm text-muted-foreground line-clamp-2">
+            {project.description}
+          </p>
+        )}
+        <div class="mt-4 flex items-center gap-4 text-xs text-muted-foreground">
+          {project.language && (
+            <span class="inline-flex items-center gap-1">
+              <span class="h-2 w-2 rounded-full bg-primary" />
+              {project.language}
+            </span>
+          )}
+          <span>⭐ {project.stars}</span>
+        </div>
+      </a>
+    ))}
+  </div>
+) : (
+  <p class="text-sm text-muted-foreground">暂无项目数据，请先运行 <code>pnpm generate-projects</code></p>
+)}

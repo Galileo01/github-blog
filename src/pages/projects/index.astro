@@ -1,0 +1,46 @@
+---
+import fs from 'node:fs';
+import path from 'node:path';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProjectsSection from '../../components/ProjectsSection.astro';
+import SortableProjectList from '../../components/SortableProjectList.tsx';
+
+// 读取所有项目数据，传给客户端排序组件
+let allProjects = [];
+try {
+  const raw = JSON.parse(fs.readFileSync(path.resolve('src/data/projects.json'), 'utf-8'));
+  // 保留有描述或 pin 的项目，按 Stars 预排序作为初始状态
+  allProjects = (raw.projects || [])
+    .filter((p) => p.description || p.pinned)
+    .sort((a, b) => b.stars - a.stars);
+} catch {
+  // 数据文件不存在时静默降级
+}
+---
+
+<BaseLayout title="项目 — Mark" description="GitHub 开源项目展示">
+  <section class="py-8">
+    <h1 class="text-3xl font-bold tracking-tight">项目</h1>
+    <p class="mt-2 text-muted-foreground">我的开源项目与代码实践</p>
+  </section>
+
+  <section class="pb-12">
+    <h2 class="text-xl font-semibold tracking-tight mb-6">精选项目</h2>
+    <ProjectsSection featured />
+  </section>
+
+  <section class="border-t border-border/40 pt-12 pb-8">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-xl font-semibold tracking-tight">所有项目</h2>
+      <a
+        href="https://github.com/Galileo01?tab=repositories"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+      >
+        在 GitHub 浏览全部 →
+      </a>
+    </div>
+    <SortableProjectList projects={allProjects} client:load />
+  </section>
+</BaseLayout>

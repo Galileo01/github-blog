@@ -1,0 +1,31 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import BlogCard from '../../components/BlogCard.astro';
+
+const allPosts = await getCollection('blog');
+const publishedPosts = allPosts
+  .filter((post) => !post.data.draft)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const allTags = [...new Set(publishedPosts.flatMap((post) => post.data.tags))];
+---
+
+<BaseLayout title="博客 — Mark" description="技术博客文章列表">
+  <section class="py-8">
+    <h1 class="text-3xl font-bold tracking-tight">博客</h1>
+    <p class="mt-2 text-muted-foreground">技术探索与项目实践的记录</p>
+  </section>
+
+  {publishedPosts.length > 0 ? (
+    <div class="grid gap-6 sm:grid-cols-2">
+      {publishedPosts.map((post) => (
+        <BlogCard post={post} />
+      ))}
+    </div>
+  ) : (
+    <div class="py-16 text-center">
+      <p class="text-muted-foreground">暂无文章，即将上线</p>
+    </div>
+  )}
+</BaseLayout>

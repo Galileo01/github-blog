@@ -1,0 +1,36 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+}
+
+const { post } = Astro.props;
+const { data } = post;
+const slug = post.id.replace(/\.md$/, '');
+---
+
+<article class="group rounded-lg border border-border bg-card p-5 shadow-sm transition-all hover:shadow-md">
+  <a href={`/blog/${slug}/`} class="block">
+    <div class="flex flex-wrap gap-2 mb-3">
+      {data.tags?.map((tag: string) => (
+        <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium bg-secondary/50 text-secondary-foreground">
+          {tag}
+        </span>
+      ))}
+    </div>
+    <h3 class="text-lg font-semibold tracking-tight group-hover:text-primary transition-colors">
+      {data.title}
+    </h3>
+    <p class="mt-2 text-sm text-muted-foreground line-clamp-2">
+      {data.description}
+    </p>
+    <time class="mt-3 block text-xs text-muted-foreground">
+      {new Date(data.date).toLocaleDateString('zh-CN', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })}
+    </time>
+  </a>
+</article>

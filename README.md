@@ -1,46 +1,86 @@
-# Astro Starter Kit: Basics
+# GitHub Blog
 
-```sh
-pnpm create astro@latest -- --template basics
+一个由 **GitHub 数据 + AI** 自动驱动的个人博客网站。
+
+## 技术栈
+
+- **框架**: [Astro](https://astro.build) 7
+- **UI**: [shadcn/ui](https://ui.shadcn.com) + Tailwind CSS 4
+- **部署**: Cloudflare Pages
+- **内容生成**: Claude API + GitHub API
+
+## 快速开始
+
+```bash
+# 安装依赖
+pnpm install
+
+# 开发
+pnpm dev
+
+# 构建
+pnpm build
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## 内容生成
 
-## 🚀 Project Structure
+```bash
+# 1. 拉取 GitHub 数据
+pnpm fetch-data
 
-Inside of your Astro project, you'll see the following folders and files:
+# 2. 生成博客文章（需要 ANTHROPIC_API_KEY）
+ANTHROPIC_API_KEY=sk-xxx pnpm generate-posts
 
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
-└── package.json
+# 3. 生成项目数据
+pnpm generate-projects
+
+# 或者一键生成：
+ANTHROPIC_API_KEY=sk-xxx pnpm generate
 ```
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+## 部署到 Cloudflare Pages
 
-## 🧞 Commands
+### 通过 GitHub Actions（推荐）
 
-All commands are run from the root of the project, from a terminal:
+1. 将代码推送到 GitHub 仓库
+2. 在 Cloudflare Dashboard 创建 Pages 项目，连接该仓库
+3. 在 GitHub 仓库设置中添加 Secrets：
+   - `ANTHROPIC_API_KEY`: 你的 Claude API 密钥
+4. 手动触发 Workflow：GitHub → Actions → "Generate Blog Content & Deploy" → Run workflow
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `pnpm install`             | Installs dependencies                            |
-| `pnpm dev`             | Starts local dev server at `localhost:4321`      |
-| `pnpm build`           | Build your production site to `./dist/`          |
-| `pnpm preview`         | Preview your build locally, before deploying     |
-| `pnpm astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `pnpm astro -- --help` | Get help using the Astro CLI                     |
+### 手动部署
 
-## 👀 Want to learn more?
+```bash
+pnpm build
+npx wrangler pages deploy dist/ --project-name=github-blog
+```
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+## 项目结构
+
+```
+github-blog/
+├── .github/workflows/      # GitHub Actions
+├── scripts/                # 数据生成脚本
+│   ├── fetch-github.js     # 拉取 GitHub 数据
+│   ├── generate-posts.js   # Claude API → 博客文章
+│   └── generate-projects.js # 项目数据
+├── src/
+│   ├── components/         # UI 组件
+│   │   ├── ui/             # shadcn 组件
+│   │   ├── Header.astro
+│   │   ├── Footer.astro
+│   │   ├── ThemeToggle.tsx
+│   │   ├── BlogCard.astro
+│   │   └── ProjectsSection.astro
+│   ├── content/blog/       # 博客文章 (Markdown)
+│   ├── content.config.ts   # 内容集合配置
+│   ├── layouts/            # 页面布局
+│   ├── pages/              # 路由页面
+│   └── styles/             # 全局样式
+├── docs/plan.md            # 项目架构文档
+└── README.md
+```
+
+## 许可证
+
+MIT
