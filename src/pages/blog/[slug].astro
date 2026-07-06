@@ -3,6 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getCollection, render } from 'astro:content';
 import { Card, CardContent } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
+import MermaidRenderer from '../../components/MermaidRenderer';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
@@ -40,6 +41,7 @@ const { Content } = await render(post);
 
     <div class="prose prose-neutral dark:prose-invert max-w-none">
       <Content />
+      <MermaidRenderer client:idle />
     </div>
   </article>
 </BaseLayout>
