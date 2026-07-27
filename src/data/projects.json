@@ -1,7 +1,7 @@
 {
-  "fetchedAt": "2026-06-30T03:35:23.243Z",
-  "totalProjects": 54,
-  "totalStars": 24,
+  "fetchedAt": "2026-07-27T12:18:46.042Z",
+  "totalProjects": 56,
+  "totalStars": 26,
   "totalForks": 4,
   "languages": [
     {
@@ -18,7 +18,7 @@
     },
     {
       "name": "Rust",
-      "count": 2
+      "count": 3
     },
     {
       "name": "Shell",
@@ -67,7 +67,7 @@
       "topics": [],
       "pinned": true,
       "url": "https://github.com/Galileo01/slap-your-laptop",
-      "updatedAt": "2026-05-28T04:05:21Z",
+      "updatedAt": "2026-07-24T12:34:27Z",
       "createdAt": "2026-05-07T02:54:26Z"
     },
     {
@@ -105,6 +105,30 @@
       "url": "https://github.com/Galileo01/chrome_extends",
       "updatedAt": "2020-06-20T06:15:51Z",
       "createdAt": "2020-06-15T12:22:42Z"
+    },
+    {
+      "name": "skystrike",
+      "description": "一款在终端中还原经典街机射击游戏 雷电 的作品，使用 Rust 编写。操控战斗机在滚动星空中躲避敌方飞机。",
+      "language": "Rust",
+      "stars": 1,
+      "forks": 0,
+      "topics": [],
+      "pinned": false,
+      "url": "https://github.com/Galileo01/skystrike",
+      "updatedAt": "2026-07-27T02:58:58Z",
+      "createdAt": "2026-07-20T01:31:08Z"
+    },
+    {
+      "name": "github-blog",
+      "description": "github-blog",
+      "language": "TypeScript",
+      "stars": 1,
+      "forks": 0,
+      "topics": [],
+      "pinned": true,
+      "url": "https://github.com/Galileo01/github-blog",
+      "updatedAt": "2026-07-26T02:13:31Z",
+      "createdAt": "2026-06-30T03:10:26Z"
     },
     {
       "name": "rust_practice",
@@ -191,16 +215,16 @@
       "createdAt": "2020-08-08T12:58:35Z"
     },
     {
-      "name": "github-blog",
-      "description": "github-blog",
-      "language": "TypeScript",
+      "name": "Codex-Dream-Skin",
+      "description": "Codex Dream Skin",
+      "language": "",
       "stars": 0,
       "forks": 0,
       "topics": [],
-      "pinned": true,
-      "url": "https://github.com/Galileo01/github-blog",
-      "updatedAt": "2026-06-30T03:15:05Z",
-      "createdAt": "2026-06-30T03:10:26Z"
+      "pinned": false,
+      "url": "https://github.com/Galileo01/Codex-Dream-Skin",
+      "updatedAt": "2026-07-18T10:15:00Z",
+      "createdAt": "2026-07-18T10:15:00Z"
     },
     {
       "name": "async-book",

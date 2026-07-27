@@ -8,7 +8,7 @@ draft: false
 
 ## 欢迎
 
-这是我的个人博客，由 **Astro + shadcn/ui** 构建，内容通过 GitHub API 和 Claude API 自动生成。
+这是我的个人博客，由 **Astro + shadcn/ui** 构建。项目数据通过 GitHub API 同步，博客文章以 Markdown 维护，可以由我或协作 Agent 辅助创作。
 
 ### 这里会有什么？
 

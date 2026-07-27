@@ -1,291 +1,128 @@
-# GitHub 自动博客 — 架构与实现计划
+# GitHub Blog — 当前架构与路线图
 
-## Context
+## 项目目标
 
-用户希望搭建一个**个人博客网站**，内容自动从 GitHub 首页数据（项目、贡献、语言统计）通过 Claude API 生成，部署到 Cloudflare Pages（使用 `pages.dev` 免费域名），前端使用 **shadcn/ui** 组件库构建。目标是零成本（除 Claude API 微量费用）、免备案、一键部署。
+构建一个由 GitHub 数据驱动的个人技术博客：
 
----
+- 自动同步公开仓库、Pinned、语言、Star 和 Fork 数据
+- 使用 Markdown 维护博客文章
+- 使用 Astro 生成静态站点
+- 通过 Cloudflare Pages 部署
+- 允许人类或任意协作 Agent 按统一规则维护文章
 
-## 一、技术栈
+当前项目事实和协作约定以 `AGENTS.md` 为准，用户操作方式以 `README.md` 为准。
 
-| 层 | 选型 | 理由 |
-|---|------|------|
-| **框架** | Astro 5.x | 内容优先的 SSG，原生支持 Cloudflare Pages，支持 React 组件岛 |
-| **UI 组件** | shadcn/ui (React) | 官方支持 Astro 模版，可访问性好，60+ 组件 |
-| **样式** | Tailwind CSS v4 | shadcn 的底层依赖 |
-| **交互组件** | React 18 | 用作 Astro 的 UI 孤岛（islands），只在需要 JS 的地方加载 |
-| **内容管理** | Astro Content Collections | 类型安全的前置元数据，自动路由 |
-| **部署** | Cloudflare Pages | 免费，自动 HTTPS，集成 Git |
-| **CI/CD** | GitHub Actions | 定时抓取数据 + 调用 API 生成内容 |
-| **内容生成** | Claude API (Anthropic SDK) | 将 GitHub 数据分析转成博客文章 |
-| **数据源** | GitHub REST API | 拉取仓库、贡献、语言统计 |
+## 当前架构
 
----
+```text
+GitHub API
+  → scripts/fetch-github.js
+  → scripts/data/github-stats.json
+  → scripts/generate-projects.js
+  → src/data/projects.json
 
-## 二、数据流
+人类 / 协作 Agent
+  → src/content/blog/*.md
 
-```
-┌────────────────────────────────────────────────────────────┐
-│                    每周自动运行                              │
-│                                                             │
-│  GitHub Actions (手动触发 workflow_dispatch)                │
-│    ├─ 1. fetch-github.js: 调用 GitHub API 获取用户数据       │
-│    ├─ 2. generate-posts.js: 调用 Claude API → 生成 Markdown │
-│    ├─ 3. 保存到 src/content/blog/                           │
-│    └─ 4. git commit && git push                             │
-│                                                             │
-└────────────────────────────────┬────────────────────────────┘
-                                 │ push
-                                 ▼
-┌────────────────────────────────────────────────────────────┐
-│                 Cloudflare Pages                            │
-│    ├─ 检测到 push → 自动构建: astro build                    │
-│    ├─ 生成静态 HTML/CSS/JS 到 dist/                          │
-│    └─ 部署到 *.pages.dev                                    │
-│                                                             │
-│    ├─ /              → 首页（Hero + 项目 + 最近文章）        │
-│    ├─ /blog          → 博客列表                              │
-│    ├─ /blog/[slug]   → 单篇文章（带目录）                     │
-│    ├─ /projects      → GitHub 项目展示                       │
-│    └─ /rss.xml       → RSS Feed（播客订阅标准格式）           │
-└────────────────────────────────────────────────────────────┘
+projects.json + Markdown
+  → Astro 7 static build
+  → dist/
+  → Cloudflare Pages
 ```
 
----
+## 技术栈
 
-## 三、页面设计与 shadcn 组件映射
+| 层 | 选型 |
+|---|---|
+| 框架 | Astro 7，static mode |
+| 内容 | Astro Content Collections + Markdown |
+| UI | shadcn/ui v4 + React Islands |
+| 样式 | Tailwind CSS 4 |
+| 交互 | React 19 |
+| 数据源 | GitHub REST API + GraphQL API |
+| 自动化 | GitHub Actions |
+| 部署 | Cloudflare Pages |
 
-### 1. 首页 `/`
+## 数据同步
 
-| 区域 | 内容 | shadcn 组件 |
-|------|------|------------|
-| **Hero** | 头像 + 名称 + 一句话简介 | `Avatar` + `Button`（GitHub 链接） |
-| **精选项目** | 3-4 个代表性仓库（卡片网格） | `Card`、`CardHeader`、`CardContent`、`Badge`（语言标签） |
-| **最近文章** | 最新 3 篇博客摘要列表 | `Card` + `Separator` |
-| **技术栈** | 语言分布可视化 | `Badge` 标签列表 |
-| **页脚** | 社交链接 + 版权 | — |
+### 输入与输出
 
-### 2. 文章列表 `/blog`
+| 阶段 | 输入 | 输出 |
+|---|---|---|
+| `pnpm fetch-data` | GitHub API | `scripts/data/github-stats.json` |
+| `pnpm generate-projects` | `github-stats.json` | `src/data/projects.json` |
+| `pnpm sync-projects` | GitHub API | 上述两个 JSON 文件 |
 
-| 区域 | 内容 | shadcn 组件 |
-|------|------|------------|
-| **头部** | 标题 + 描述 | — |
-| **文章列表** | 按日期降序，每篇：标题、日期、标签、摘要 | `Card`、`Badge` |
-| **分页** | 上一页/下一页 | `Button`（变体 `outline`） |
+`scripts/data/` 是被 Git 忽略的中间数据。`src/data/projects.json` 是构建时使用并需要提交的项目数据。
 
-### 3. 文章详情 `/blog/[slug]`
+### Pinned 获取策略
 
-| 区域 | 内容 | shadcn 组件 |
-|------|------|------------|
-| **文章头** | 标题、日期、标签 | `Badge` |
-| **正文** | Markdown 渲染 + 自动目录 | `TableOfContents`（自定义） |
-| **相关文章** | 相同标签的文章 | `Card` |
+1. 有 `GITHUB_TOKEN` 时优先使用 GraphQL `pinnedItems`
+2. GraphQL 失败或无 Token 时解析 GitHub 个人主页 HTML
+3. 两种方式都失败时返回空数组，页面按 Star 排序降级
 
-### 4. 项目展示 `/projects`
+## 内容维护
 
-| 区域 | 内容 | shadcn 组件 |
-|------|------|------------|
-| **筛选** | 按语言/类别筛选 | `Tabs` |
-| **项目网格** | 全量 GitHub 仓库卡片 | `Card`、`Badge`（星星数/语言/主题） |
+文章放在 `src/content/blog/*.md`，通过 `src/content.config.ts` 校验 frontmatter。
 
-### 5. 项目详情 `/projects/[name]`
+文章可以由人类或任意协作 Agent 创建，但必须遵守 `AGENTS.md` 中的博客文章创作约定，包括：
 
-| 区域 | 内容 | shadcn 组件 |
-|------|------|------------|
-| **概要** | 仓库名称、描述、Star/Fork 数 | `Card` |
-| **README 摘要** | AI 生成的仓库亮点 | — |
-| **相关文章** | 提到此项目的博客 | `Card` |
+- 只有用户明确要求时才新增文章
+- 不擅自覆盖已有文章
+- 使用有效 frontmatter
+- 以真实代码、项目状态和可靠资料为依据
+- 修改后运行构建和 diff 检查
 
----
+## 页面
 
-## 四、项目目录结构
+| 路由 | 内容 |
+|---|---|
+| `/` | 个人介绍、技术栈、最近文章、精选项目 |
+| `/blog` | 博客文章列表 |
+| `/blog/[slug]` | Markdown 文章详情 |
+| `/projects` | GitHub 项目列表与客户端排序 |
+| `/rss.xml` | RSS Feed |
 
-```
-github-blog/
-├── .github/
-│   └── workflows/
-│       └── generate-and-deploy.yml   # GitHub Actions 定时任务
-├── scripts/
-│   ├── fetch-github.js               # 调用 GitHub API 获取数据
-│   ├── generate-posts.js             # 调用 Claude API 生成文章
-│   └── generate-projects.js          # 生成项目数据 JSON
-├── src/
-│   ├── components/
-│   │   └── ui/                       # shadcn 组件（由 CLI 生成）
-│   │       ├── avatar.tsx
-│   │       ├── badge.tsx
-│   │       ├── button.tsx
-│   │       ├── card.tsx
-│   │       ├── tabs.tsx
-│   │       └── separator.tsx
-│   ├── components/                   # 自定义 React 组件
-│   │   ├── Header.astro              # 导航栏（PC + 移动端 Sheet）
-│   │   ├── Footer.astro
-│   │   ├── HeroSection.astro
-│   │   ├── ProjectCard.tsx           # React 交互组件
-│   │   ├── BlogCard.tsx
-│   │   ├── ThemeToggle.tsx           # 深色/浅色切换
-│   │   └── TagFilter.tsx
-│   ├── content/
-│   │   ├── config.ts                 # Content Collection schema
-│   │   └── blog/                     # 自动生成的.MD 文章
-│   ├── layouts/
-│   │   └── BaseLayout.astro          # 全局布局（head、导航、主题）
-│   ├── pages/
-│   │   ├── index.astro               # 首页
-│   │   ├── blog/
-│   │   │   ├── index.astro           # 博客列表
-│   │   │   └── [...slug].astro       # 动态文章页（Content Collections）
-│   │   ├── projects/
-│   │   │   ├── index.astro           # 项目展示
-│   │   │   └── [name].astro          # 项目详情
-│   │   ├── about.astro               # 关于我
-│   │   └── rss.xml.js                # RSS Feed 生成
-│   └── lib/
-│       ├── github.ts                 # GitHub API 封装
-│       ├── utils.ts                  # shadcn cn() 工具函数
-│       └── constants.ts              # 配置常量
-├── public/                           # 静态资源
-├── astro.config.mjs
-├── tailwind.config.mjs
-├── tsconfig.json
-├── package.json
-└── wrangler.toml                     # Cloudflare Pages 配置（可选）
+## 自动化与部署
+
+`.github/workflows/sync-projects-and-deploy.yml` 通过 `workflow_dispatch` 手动触发：
+
+1. 安装 Node.js 22 和 pnpm 10
+2. 抓取最新 GitHub 数据
+3. 生成 `src/data/projects.json`
+4. 有变化时提交并推送
+5. 执行 Astro 静态构建
+6. 部署 `dist/` 到 Cloudflare Pages
+
+需要的环境变量：
+
+| 变量 | 用途 |
+|---|---|
+| `GITHUB_TOKEN` | GitHub Actions 自动注入，用于 API 和 Pinned 查询 |
+| `CLOUDFLARE_API_TOKEN` | 部署 Cloudflare Pages |
+
+## 验证
+
+本地最低验证流程：
+
+```bash
+nvm use 22
+pnpm install
+pnpm build
+git diff --check
 ```
 
----
+项目数据更新后还需要确认：
 
-## 五、内容生成脚本设计
+- `src/data/projects.json` 可以正常解析
+- 新增仓库符合 fork 和 description 过滤规则
+- `/projects` 构建产物包含预期项目
+- Pinned 标记与 GitHub 当前设置一致
 
-### `scripts/generate-posts.js` 逻辑
+## 后续路线
 
-```
-1. 读取 scripts/data/github-stats.json（由 fetch-github.js 生成）
-2. 构造 prompt，包含：
-   - 用户仓库列表（名称、描述、语言、Star 数）
-   - 近期 GitHub 事件
-   - 语言分布统计
-3. 调用 Claude API（Anthropic SDK）
-   - 要求输出 Markdown 格式
-   - 包含 frontmatter（title, date, tags, description）
-   - 限定 800-1500 字
-4. 保存到 src/content/blog/ 目录
-```
-
-### 文章主题类型（AI 自动选择）
-
-| 类型 | 内容 | 触发条件 |
-|------|------|---------|
-| **周报** | 本周贡献总结、新项目、变化 | 有活跃更新 |
-| **项目深挖** | 聚焦一个仓库的架构/技术决策 | 新仓库或重大更新 |
-| **技术栈分析** | 语言/框架使用趋势 | 数据有变化 |
-| **开源动态** | Star/Issue/PR 变化 | 有显著变化 |
-
----
-
-## 六、GitHub Actions 工作流
-
-```yaml
-# .github/workflows/generate-and-deploy.yml
-name: Generate Blog Content & Deploy
-
-on:
-  workflow_dispatch:         # 手动触发，提供参数选项
-    inputs:
-      article_type:
-        description: '文章类型（留空则 AI 自动选择）'
-        required: false
-        type: choice
-        options:
-          - auto（AI 自动选择）
-          - weekly（周报）
-          - project（项目深挖）
-          - tech-stack（技术栈分析）
-      generate_count:
-        description: '生成篇数（1-3）'
-        required: false
-        default: '1'
-
-jobs:
-  generate:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-      - run: npm install
-      - run: node scripts/fetch-github.js
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: node scripts/generate-posts.js
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-      - run: node scripts/generate-projects.js
-      - run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add src/content/
-          git diff --quiet && git diff --staged --quiet || git commit -m "chore: auto-generate blog content"
-          git push
-```
-
----
-
-## 七、实施步骤（6 步）
-
-### Step 1: 初始化项目
-
-```
-pnpm create astro@latest github-blog --template basics
-cd github-blog
-pnpm astro add react tailwind
-npx shadcn@latest init -t astro
-npx shadcn@latest add card badge button avatar tabs separator
-```
-
-### Step 2: 搭建基础框架
-
-- 创建 `src/layouts/BaseLayout.astro`（全局导航 + 主题 + 页脚）
-- 创建各页面 `index.astro`、`blog/index.astro`、`projects/index.astro`
-- 配置 `astro.config.mjs`（Cloudflare adapter + site URL）
-- 添加 `@astrojs/rss`、`@astrojs/cloudflare`
-
-### Step 3: 实现 UI 组件
-
-- 使用 shadcn 组件构建：Header、Footer、HeroSection、ProjectCard、BlogCard、ThemeToggle
-- 实现深色/浅色主题切换（shadcn 内置支持）
-
-### Step 4: 配置 Content Collections
-
-- `src/content/config.ts` 定义博客文章的 schema
-- 配置 `[...slug].astro` 动态路由
-
-### Step 5: 编写数据生成脚本
-
-- `scripts/fetch-github.js` — GitHub API 封装（仓库、语言、事件）
-- `scripts/generate-posts.js` — Claude API → Markdown 内容生成
-- `scripts/generate-projects.js` — 项目数据 JSON 生成
-
-### Step 6: 配置部署
-
-- GitHub Actions 工作流
-- Cloudflare Pages 自动部署
-- 设置 `ANTHROPIC_API_KEY` 和 `GITHUB_TOKEN` 到 GitHub Secrets
-
----
-
-## 八、验证方式
-
-1. **本地验证**：`pnpm dev` 启动开发服务器，访问 `http://localhost:4321`
-2. **构建验证**：`pnpm build` 确认无报错，检查 `dist/` 输出
-3. **手动生成验证**：运行 `node scripts/generate-posts.js` 看是否能生成有效 Markdown
-4. **最终验证**：push 到 main → Actions 运行 → Pages 部署成功 → 访问 `*.pages.dev`
-
----
-
-## 九、后续可选增强（不在本轮实施）
-
-- 绑定自定义域名 + Cloudflare DNS 托管，改善国内访问
-- 添加评论区（Giscus / Gitalk）
-- 添加访问统计（Umami / Plausible，自建免费版）
-- 文章支持 AI 朗读（Edge-TTS 一键转音频）
-- 百度/Google 搜索收录优化
+1. 为数据同步脚本增加单元测试和 fixture
+2. 减少项目列表客户端 bundle 体积
+3. 增加文章草稿和发布检查
+4. 改善 RSS、SEO 和结构化数据
+5. 按需增加访问统计与管理能力
