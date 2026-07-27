@@ -1,10 +1,10 @@
 # GitHub Blog
 
-一个由 **GitHub 数据 + AI** 自动驱动的个人博客网站。基于 [Astro](https://astro.build) 7 + [shadcn/ui](https://ui.shadcn.com) 构建，部署在 **Cloudflare Pages**（免费）。
+一个由 **GitHub 数据驱动**的个人技术博客。项目数据自动同步，文章以 Markdown 维护；基于 [Astro](https://astro.build) 7 + [shadcn/ui](https://ui.shadcn.com) 构建，部署在 **Cloudflare Pages**。
 
 ## 特性
 
-- 📝 **AI 自动写文章**：根据 GitHub 仓库、Star、事件等数据，调用 Claude API 自动生成博客
+- 📝 **Markdown 博客**：人类或协作 Agent 按统一规则维护文章
 - 📌 **精选项目**：自动同步 GitHub Pinned 仓库
 - 🔍 **项目排序**：按 Stars / 最近更新排序
 - 🌙 **深色/浅色主题**：shadcn 主题系统，跟随系统偏好
@@ -21,26 +21,34 @@
 | **交互** | React 19 |
 | **部署** | Cloudflare Pages |
 | **CI/CD** | GitHub Actions |
-| **内容生成** | Claude API（Anthropic） |
+| **内容管理** | Astro Content Collections + Markdown |
 | **数据源** | GitHub REST API + GraphQL API |
 
 ## 快速开始
 
+前置要求：
+
+- Node.js `>=22.12.0`（推荐使用 nvm）
+- pnpm 10
+
 ```bash
+# 切换 Node.js 版本
+nvm use 22
+
 # 安装依赖
 pnpm install
 
-# 本地开发
+# 启动本地开发服务器
 pnpm dev
-
-# 构建
-pnpm build
 ```
 
-### 前置要求
+浏览器打开：
 
-- **Node.js >= 22.12.0**（Astro 7 要求，推荐用 nvm 管理）
-- **pnpm**（推荐 v10）
+- 首页：`http://localhost:4321/`
+- 博客：`http://localhost:4321/blog`
+- 项目：`http://localhost:4321/projects`
+
+本地查看已有内容不需要重新抓取 GitHub 或生成文章。提交前可执行 `pnpm build` 验证生产构建。
 
 ## 项目结构
 
@@ -49,7 +57,6 @@ github-blog/
 ├── .github/workflows/         # GitHub Actions 工作流
 ├── scripts/
 │   ├── fetch-github.js        # 从 GitHub 拉取仓库、Pinned、事件数据
-│   ├── generate-posts.js      # 调用 Claude API → 生成博客 Markdown
 │   └── generate-projects.js   # 根据 GitHub 数据生成 projects.json
 ├── src/
 │   ├── components/
@@ -75,20 +82,22 @@ github-blog/
 
 ## 数据生成
 
-博客内容通过脚本生成，建议按以下顺序执行：
+| 命令 | 作用 | 是否访问外部 API | 主要输出 |
+|------|------|------------------|----------|
+| `pnpm fetch-data` | 抓取 GitHub 用户、仓库、Pinned 和事件数据 | GitHub API | `scripts/data/github-stats.json` |
+| `pnpm generate-projects` | 根据已有 GitHub 数据生成项目页数据 | 否 | `src/data/projects.json` |
+| `pnpm sync-projects` | 依次执行 `fetch-data` 和 `generate-projects` | GitHub API | 上述两个 JSON 文件 |
+
+注意：
+
+- `generate-projects` 读取已有的 `scripts/data/github-stats.json`，不会自动刷新 GitHub 数据。
+- `scripts/data/` 是被 Git 忽略的中间数据；需要提交的是 `src/data/projects.json`。
+- 博客文章由人类或协作 Agent 按 `AGENTS.md` 中的规则写入 `src/content/blog/`。
+
+只同步新增仓库或 Pinned：
 
 ```bash
-# 1. 拉取 GitHub 数据（仓库、Pinned、语言统计）
-pnpm fetch-data
-
-# 2. 生成博客文章（需要 ANTHROPIC_API_KEY）
-ANTHROPIC_API_KEY=sk-ant-xxx pnpm generate-posts
-
-# 3. 生成项目数据（基于 GitHub 数据 + Pinned 标记）
-pnpm generate-projects
-
-# 或者一键执行：
-ANTHROPIC_API_KEY=sk-ant-xxx pnpm generate
+pnpm sync-projects
 ```
 
 ## 部署到 Cloudflare Pages
@@ -119,7 +128,6 @@ ANTHROPIC_API_KEY=sk-ant-xxx pnpm generate
 
 | Secret | 说明 | 必需 |
 |--------|------|:----:|
-| `ANTHROPIC_API_KEY` | Claude API 密钥，用于生成博客文章 | ✅ |
 | `GITHUB_TOKEN` | 自动可用，无需手动添加。用于获取 Pinned 仓库数据 | — |
 | `CLOUDFLARE_API_TOKEN` | Cloudflare API 令牌（上一步获取） | ✅ |
 
@@ -128,17 +136,15 @@ ANTHROPIC_API_KEY=sk-ant-xxx pnpm generate
 ### 第四步：触发工作流
 
 1. 前往 GitHub 仓库 → **Actions** 页
-2. 点击 **Generate Blog Content & Deploy**
+2. 点击 **Sync GitHub Projects & Deploy**
 3. 点击 **Run workflow**
-4. 选择文章类型和篇数
-5. 点击 **Run**
+4. 点击 **Run**
 
 工作流会：
 1. 拉取最新 GitHub 数据
-2. 调用 Claude API 生成博客文章
-3. 生成项目数据
-4. 推送到仓库
-5. 触发 Cloudflare Pages 自动构建部署
+2. 生成项目数据
+3. 推送到仓库
+4. 触发 Cloudflare Pages 静态构建和部署
 
 ## 更新博客
 
@@ -148,41 +154,34 @@ ANTHROPIC_API_KEY=sk-ant-xxx pnpm generate
 sequenceDiagram
     participant You
     participant GitHub Actions
-    participant Claude API
     participant Cloudflare
 
     You->>GitHub Actions: 点击 "Run workflow"
     GitHub Actions->>GitHub: 拉取最新仓库数据
-    GitHub Actions->>Claude API: 请求生成文章
-    Claude API-->>GitHub Actions: 返回 Markdown
+    GitHub Actions->>GitHub Actions: 生成 projects.json
     GitHub Actions->>GitHub: commit + push
     GitHub Actions->>Cloudflare: 触发自动部署
     Cloudflare-->>You: 部署完成 ✅
 ```
 
 1. 打开 GitHub 仓库的 **Actions** 页
-2. 在左侧选择 **Generate Blog Content & Deploy**
+2. 在左侧选择 **Sync GitHub Projects & Deploy**
 3. 点击右上角 **Run workflow**
-4. 选择文章类型（auto / weekly / project / tech-stack）
-5. 选择生成篇数（1-3）
-6. 点击 **Run workflow**
+4. 点击 **Run workflow**
 
 ### 方式二：本地生成 + 推送
 
 ```bash
-# 1. 拉取最新 GitHub 数据
-pnpm fetch-data
+# 1. 拉取最新 GitHub 数据并生成项目数据
+pnpm sync-projects
 
 # 2. 查看当前数据状态（确认 Pinned 等）
 cat scripts/data/github-stats.json | python3 -m json.tool
 
-# 3. 生成项目数据
-pnpm generate-projects
-
-# 4. 可选：本地构建验证
+# 3. 可选：本地构建验证
 pnpm build
 
-# 5. 提交推送
+# 4. 提交推送
 git add src/data/
 git commit -m "chore: update projects data"
 git push
@@ -195,7 +194,7 @@ git push
 - **GraphQL 模式**（有 GITHUB_TOKEN）：通过 GitHub GraphQL API 精确获取
 - **HTML 降级模式**（无 Token）：解析 GitHub 个人主页 HTML
 
-修改 GitHub 上的 Pinned 后，运行 `pnpm fetch-data && pnpm generate-projects` 即可更新。
+新增仓库或修改 GitHub Pinned 后，运行 `pnpm sync-projects` 即可更新。
 
 ## 自定义域名（可选）
 

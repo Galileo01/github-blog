@@ -1,25 +1,10 @@
-name: Generate Blog Content & Deploy
+name: Sync GitHub Projects & Deploy
 
 on:
   workflow_dispatch:
-    inputs:
-      article_type:
-        description: '文章类型'
-        required: false
-        type: choice
-        default: 'auto'
-        options:
-          - auto
-          - weekly
-          - project
-          - tech-stack
-      generate_count:
-        description: '生成篇数 (1-3)'
-        required: false
-        default: '1'
 
 jobs:
-  generate:
+  sync:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -42,28 +27,23 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Generate blog posts
-        run: node scripts/generate-posts.js ${{ inputs.article_type || 'auto' }} ${{ inputs.generate_count || '1' }}
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-
       - name: Generate projects data
         run: node scripts/generate-projects.js
 
-      - name: Commit generated content
+      - name: Commit generated project data
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add src/content/blog/ src/data/
+          git add src/data/projects.json
           if git diff --quiet && git diff --staged --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "chore: auto-generate blog content"
+            git commit -m "chore: sync GitHub projects"
             git push
           fi
 
   deploy:
-    needs: generate
+    needs: sync
     runs-on: ubuntu-latest
     if: success()
     steps:

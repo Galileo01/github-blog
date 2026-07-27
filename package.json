@@ -11,9 +11,8 @@
     "preview": "astro preview",
     "astro": "astro",
     "fetch-data": "node scripts/fetch-github.js",
-    "generate-posts": "node scripts/generate-posts.js",
     "generate-projects": "node scripts/generate-projects.js",
-    "generate": "pnpm fetch-data && pnpm generate-posts && pnpm generate-projects"
+    "sync-projects": "pnpm fetch-data && pnpm generate-projects"
   },
   "dependencies": {
     "@astrojs/react": "^6.0.0",
