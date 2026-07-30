@@ -1,0 +1,39 @@
+<section
+  class="sticky top-[6.5rem] z-40 rounded-lg border bg-card/95 p-4 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-card/85 sm:top-16"
+  aria-labelledby="analytics-time-range-heading"
+>
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <h2 id="analytics-time-range-heading" class="text-sm font-semibold">统计时间</h2>
+      <p class="mt-1 text-xs text-muted-foreground">统一影响概要、趋势、页面占比和列表</p>
+    </div>
+    <div
+      class="inline-flex rounded-md border bg-muted/30 p-1"
+      role="group"
+      aria-label="Dashboard 统计时间"
+    >
+      {
+        [
+          ['today', '今日'],
+          ['7d', '7 天'],
+          ['month', '当月'],
+          ['all', '所有'],
+        ].map(([value, label]) => (
+          <button
+            type="button"
+            data-analytics-range={value}
+            aria-pressed={value === '7d' ? 'true' : 'false'}
+            class:list={[
+              'rounded px-3 py-1.5 text-sm transition-colors focus-visible:ring-2 focus-visible:ring-ring',
+              value === '7d'
+                ? 'bg-background font-medium text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground',
+            ]}
+          >
+            {label}
+          </button>
+        ))
+      }
+    </div>
+  </div>
+</section>

@@ -1,0 +1,111 @@
+---
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  RefreshCw,
+  Search,
+  X,
+} from 'lucide-react';
+---
+
+<section id="analytics-popular-table" aria-labelledby="popular-heading">
+  <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
+    <div>
+      <h2 id="popular-heading" class="text-xl font-semibold">热门页面列表</h2>
+      <p id="popular-summary" class="mt-1 text-xs text-muted-foreground">
+        最近 7 天 · 按 PV 降序
+      </p>
+    </div>
+
+    <div class="w-full min-w-0 sm:w-80">
+      <label for="popular-path-filter" class="mb-1.5 block text-sm font-medium">过滤 Path</label>
+      <span class="relative block">
+        <Search
+          size={16}
+          aria-hidden="true"
+          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+        />
+        <input
+          id="popular-path-filter"
+          type="search"
+          maxlength="200"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="/blog 或 hello-world"
+          class="w-full rounded-md border bg-background py-2 pr-9 pl-9 text-sm outline-none focus:ring-2 focus:ring-ring"
+        />
+        <button
+          id="popular-path-clear"
+          type="button"
+          class="absolute right-1.5 top-1/2 hidden -translate-y-1/2 rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+          aria-label="清除 Path 过滤"
+        >
+          <X size={16} aria-hidden="true" />
+        </button>
+      </span>
+      <p id="popular-path-error" class="mt-1.5 hidden text-sm text-destructive"></p>
+    </div>
+  </div>
+
+  <div
+    id="popular-error"
+    class="mb-4 hidden items-center justify-between gap-3 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive"
+  >
+    <span>页面列表加载失败，请稍后重试。</span>
+    <button
+      id="popular-retry"
+      type="button"
+      class="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-destructive/30 px-2.5 py-1.5 font-medium hover:bg-destructive/10 focus-visible:ring-2 focus-visible:ring-ring"
+    >
+      <RefreshCw size={14} aria-hidden="true" />
+      重试
+    </button>
+  </div>
+
+  <div class="overflow-x-auto rounded-lg border">
+    <table class="w-full min-w-lg text-left text-sm">
+      <thead class="border-b bg-muted/50 text-muted-foreground">
+        <tr>
+          <th class="px-4 py-3 font-medium">页面</th>
+          <th id="popular-pv-header" class="w-28 px-2 py-2 font-medium" aria-sort="descending">
+            <button
+              type="button"
+              data-popular-sort="pv"
+              class="inline-flex w-full items-center gap-1.5 rounded px-2 py-1 text-left hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              PV
+              <span data-sort-icon="neutral" class="hidden"><ArrowUpDown size={14} aria-hidden="true" /></span>
+              <span data-sort-icon="asc" class="hidden"><ArrowUp size={14} aria-hidden="true" /></span>
+              <span data-sort-icon="desc"><ArrowDown size={14} aria-hidden="true" /></span>
+            </button>
+          </th>
+          <th id="popular-uv-header" class="w-28 px-2 py-2 font-medium" aria-sort="none">
+            <button
+              type="button"
+              data-popular-sort="uv"
+              class="inline-flex w-full items-center gap-1.5 rounded px-2 py-1 text-left hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              UV
+              <span data-sort-icon="neutral"><ArrowUpDown size={14} aria-hidden="true" /></span>
+              <span data-sort-icon="asc" class="hidden"><ArrowUp size={14} aria-hidden="true" /></span>
+              <span data-sort-icon="desc" class="hidden"><ArrowDown size={14} aria-hidden="true" /></span>
+            </button>
+          </th>
+        </tr>
+      </thead>
+      <tbody id="popular-list">
+        <tr>
+          <td class="px-4 py-5 text-muted-foreground" colspan="3">正在加载…</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<style is:global>
+  #popular-path-filter::-webkit-search-cancel-button {
+    appearance: none;
+    -webkit-appearance: none;
+  }
+</style>

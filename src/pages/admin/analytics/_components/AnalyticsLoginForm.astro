@@ -1,0 +1,22 @@
+<form id="admin-login" class="mx-auto hidden max-w-sm rounded-lg border bg-card p-6">
+  <h2 class="text-xl font-semibold">后台登录</h2>
+  <div class="mt-5 space-y-4">
+    <label class="sr-only" for="admin-password">管理密码</label>
+    <input
+      id="admin-password"
+      type="password"
+      autocomplete="current-password"
+      required
+      placeholder="请输入管理密码"
+      class="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+    />
+    <button
+      id="admin-login-button"
+      type="submit"
+      class="w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+    >
+      登录
+    </button>
+    <p id="admin-login-error" class="hidden text-sm text-destructive" role="alert"></p>
+  </div>
+</form>

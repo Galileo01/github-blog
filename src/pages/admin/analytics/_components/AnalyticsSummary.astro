@@ -1,0 +1,24 @@
+---
+const cards = [
+  { id: 'summary-pv', label: '区间 PV' },
+  { id: 'summary-uv', label: '区间 UV' },
+  { id: 'summary-pages', label: '活跃页面' },
+  { id: 'summary-views-per-visitor', label: '人均浏览' },
+];
+---
+
+<section aria-labelledby="summary-heading">
+  <div class="mb-4">
+    <h2 id="summary-heading" class="text-xl font-semibold">统计概要</h2>
+    <p id="summary-caption" class="mt-1 text-xs text-muted-foreground">最近 7 天</p>
+  </div>
+  <p id="summary-error" class="mb-3 hidden text-sm text-destructive" role="alert"></p>
+  <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    {cards.map(({ id, label }) => (
+      <div class="rounded-lg border bg-card p-4">
+        <p class="text-sm text-muted-foreground">{label}</p>
+        <p id={id} class="mt-2 text-2xl font-bold tabular-nums">—</p>
+      </div>
+    ))}
+  </div>
+</section>

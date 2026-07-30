@@ -36,6 +36,13 @@ const { Content } = await render(post);
         </time>
         <span>·</span>
         <span>{post.data.description}</span>
+        <span>·</span>
+        <span
+          data-analytics-page-stats
+          data-page={`/blog/${post.id.replace(/\.md$/, '')}`}
+        >
+          -- PV / -- UV
+        </span>
       </div>
     </header>
 

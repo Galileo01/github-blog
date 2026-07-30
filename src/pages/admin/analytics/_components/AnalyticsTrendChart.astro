@@ -1,0 +1,61 @@
+<section id="analytics-trend-chart" aria-labelledby="trend-heading">
+  <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
+    <div>
+      <h2 id="trend-heading" class="text-xl font-semibold">最近 7 天趋势</h2>
+      <p id="trend-caption" class="mt-1 text-xs text-muted-foreground">按北京时间 · 按日</p>
+    </div>
+    <div class="flex items-center gap-4 text-xs text-muted-foreground" aria-label="图表图例">
+      <span class="inline-flex items-center gap-2">
+        <span class="h-0.5 w-5 rounded bg-[var(--analytics-pv)]"></span>
+        PV
+      </span>
+      <span class="inline-flex items-center gap-2">
+        <span class="w-5 border-t-2 border-dashed border-[var(--analytics-uv)]"></span>
+        UV
+      </span>
+    </div>
+  </div>
+
+  <p
+    id="trend-error"
+    class="hidden rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive"
+  ></p>
+  <div id="trend-card" class="rounded-lg border bg-card p-3 sm:p-5">
+    <div id="trend-chart-container" class="relative min-h-70 w-full">
+      <svg
+        id="trend-chart"
+        class="block h-70 w-full overflow-visible"
+        role="img"
+        aria-labelledby="trend-chart-title trend-chart-description"
+      >
+        <title id="trend-chart-title">最近 7 日 PV 和 UV 趋势</title>
+        <desc id="trend-chart-description">使用 Tab 键聚焦各日期数据点以查看精确数值。</desc>
+      </svg>
+      <div
+        id="trend-tooltip"
+        class="pointer-events-none absolute top-2 z-10 hidden min-w-28 -translate-x-1/2 rounded-md border bg-popover px-3 py-2 text-xs text-popover-foreground shadow-md"
+      >
+        <p id="trend-tooltip-day" class="font-medium"></p>
+        <p id="trend-tooltip-pv" class="mt-1 text-[var(--analytics-pv)]"></p>
+        <p id="trend-tooltip-uv" class="text-[var(--analytics-uv)]"></p>
+      </div>
+    </div>
+    <div id="trend-summary" class="sr-only"></div>
+  </div>
+</section>
+
+<style is:global>
+  :root {
+    --analytics-pv: oklch(0.58 0.2 258);
+    --analytics-uv: oklch(0.7 0.17 55);
+  }
+
+  .dark {
+    --analytics-pv: oklch(0.72 0.16 255);
+    --analytics-uv: oklch(0.78 0.15 65);
+  }
+
+  .analytics-trend-hit-area:focus {
+    outline: none;
+  }
+</style>
