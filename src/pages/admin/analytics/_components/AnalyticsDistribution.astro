@@ -1,0 +1,166 @@
+---
+import {
+  PieChart,
+  RefreshCw,
+} from 'lucide-react';
+---
+
+<section id="analytics-distribution" aria-labelledby="distribution-heading">
+  <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
+    <div>
+      <h2 id="distribution-heading" class="text-xl font-semibold">页面占比</h2>
+      <p id="distribution-caption" class="mt-1 text-xs text-muted-foreground">
+        最近 7 天 · 按 PV 查看
+      </p>
+    </div>
+    <div class="flex flex-wrap items-center gap-2">
+      <div
+        class="inline-flex rounded-md border bg-muted/30 p-1"
+        role="group"
+        aria-label="页面占比维度"
+      >
+        {
+          [
+            ['section', '页面大类'],
+            ['article', '博客文章'],
+          ].map(([dimension, label]) => (
+            <button
+              type="button"
+              data-distribution-dimension={dimension}
+              aria-pressed={dimension === 'section' ? 'true' : 'false'}
+              class:list={[
+                'rounded px-3 py-1.5 text-sm transition-colors focus-visible:ring-2 focus-visible:ring-ring',
+                dimension === 'section'
+                  ? 'bg-background font-medium text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground',
+              ]}
+            >
+              {label}
+            </button>
+          ))
+        }
+      </div>
+      <div
+        class="inline-flex rounded-md border bg-muted/30 p-1"
+        role="group"
+        aria-label="页面占比指标"
+      >
+        {
+          ['pv', 'uv'].map((metric) => (
+            <button
+              type="button"
+              data-distribution-metric={metric}
+              aria-pressed={metric === 'pv' ? 'true' : 'false'}
+              class:list={[
+                'rounded px-3 py-1.5 text-sm uppercase transition-colors focus-visible:ring-2 focus-visible:ring-ring',
+                metric === 'pv'
+                  ? 'bg-background font-medium text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground',
+              ]}
+            >
+              {metric}
+            </button>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+
+  <div
+    id="distribution-error"
+    class="mb-4 hidden items-center justify-between gap-3 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive"
+  >
+    <span>页面占比加载失败，请稍后重试。</span>
+    <button
+      id="distribution-retry"
+      type="button"
+      class="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-destructive/30 px-2.5 py-1.5 font-medium hover:bg-destructive/10 focus-visible:ring-2 focus-visible:ring-ring"
+    >
+      <RefreshCw size={14} aria-hidden="true" />
+      重试
+    </button>
+  </div>
+
+  <div class="rounded-lg border bg-card p-4 sm:p-5">
+    <div class="mb-3 flex items-center justify-between gap-3">
+      <h3 id="distribution-card-heading" class="font-semibold">页面大类分布</h3>
+      <PieChart size={18} aria-hidden="true" className="text-muted-foreground" />
+    </div>
+
+    <div id="distribution-content" class="grid items-center gap-5 md:grid-cols-[15rem_1fr]">
+      <div class="mx-auto w-full max-w-60">
+        <svg
+          id="distribution-chart"
+          class="block aspect-square w-full"
+          viewBox="0 0 220 220"
+          role="img"
+          aria-labelledby="distribution-chart-title distribution-chart-description"
+        >
+          <title id="distribution-chart-title">热门页面占比</title>
+          <desc id="distribution-chart-description">按当前时间和指标统计的页面访问占比。</desc>
+          <circle
+            cx="110"
+            cy="110"
+            r="72"
+            fill="none"
+            stroke="var(--muted)"
+            stroke-width="28"
+          />
+          <g id="distribution-slices"></g>
+          <text
+            id="distribution-metric"
+            x="110"
+            y="104"
+            text-anchor="middle"
+            fill="var(--muted-foreground)"
+            font-size="12"
+          >PV 页面合计</text>
+          <text
+            id="distribution-total"
+            x="110"
+            y="128"
+            text-anchor="middle"
+            fill="var(--foreground)"
+            font-size="22"
+            font-weight="700"
+          >—</text>
+        </svg>
+      </div>
+      <ol id="distribution-legend" class="grid gap-2 text-sm sm:grid-cols-2"></ol>
+    </div>
+    <p id="distribution-empty" class="hidden py-8 text-center text-sm text-muted-foreground">
+      当前时间范围内暂无占比数据
+    </p>
+    <div id="distribution-summary" class="sr-only"></div>
+  </div>
+</section>
+
+<style is:global>
+  :root {
+    --analytics-share-1: oklch(0.62 0.2 255);
+    --analytics-share-2: oklch(0.7 0.17 55);
+    --analytics-share-3: oklch(0.66 0.16 155);
+    --analytics-share-4: oklch(0.64 0.18 315);
+    --analytics-share-5: oklch(0.72 0.14 205);
+    --analytics-share-6: oklch(0.68 0.17 105);
+    --analytics-share-7: oklch(0.64 0.16 15);
+    --analytics-share-8: oklch(0.65 0.13 285);
+    --analytics-share-other: oklch(0.72 0.02 255);
+  }
+
+  .dark {
+    --analytics-share-1: oklch(0.72 0.16 255);
+    --analytics-share-2: oklch(0.78 0.15 65);
+    --analytics-share-3: oklch(0.74 0.14 155);
+    --analytics-share-4: oklch(0.74 0.14 315);
+    --analytics-share-5: oklch(0.78 0.12 205);
+    --analytics-share-6: oklch(0.78 0.14 105);
+    --analytics-share-7: oklch(0.76 0.14 15);
+    --analytics-share-8: oklch(0.76 0.12 285);
+    --analytics-share-other: oklch(0.56 0.02 255);
+  }
+
+  .analytics-distribution-slice:focus {
+    outline: none;
+  }
+</style>

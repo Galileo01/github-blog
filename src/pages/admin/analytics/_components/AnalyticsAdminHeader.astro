@@ -1,0 +1,31 @@
+---
+import {
+  LogOut,
+  RefreshCw,
+} from 'lucide-react';
+---
+
+<div class="mb-8 flex items-start justify-between gap-4">
+  <div>
+    <h1 class="text-3xl font-bold tracking-tight">访问统计</h1>
+    <p class="mt-2 text-sm text-muted-foreground">页面访问数据看板</p>
+  </div>
+  <div id="admin-actions" class="hidden items-center gap-2">
+    <button
+      id="admin-refresh"
+      type="button"
+      class="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-wait disabled:opacity-60"
+    >
+      <RefreshCw id="admin-refresh-icon" size={16} aria-hidden="true" />
+      <span id="admin-refresh-label">刷新数据</span>
+    </button>
+    <button
+      id="admin-logout"
+      type="button"
+      class="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
+    >
+      <LogOut size={16} aria-hidden="true" />
+      退出登录
+    </button>
+  </div>
+</div>

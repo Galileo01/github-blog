@@ -1,0 +1,81 @@
+<script is:inline>
+  (function () {
+    const pathname = window.location.pathname;
+    if (pathname.startsWith('/admin')) return;
+    const page = pathname.length > 1 && pathname.endsWith('/')
+      ? pathname.slice(0, -1)
+      : pathname;
+
+    const uuidV4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    const throttleKey = `analytics_${page}`;
+    const now = Date.now();
+
+    function updatePageStats(data) {
+      document.querySelectorAll('[data-analytics-page-stats]').forEach(function (element) {
+        if (element.getAttribute('data-page') === data.page) {
+          element.textContent = `${data.pv} PV / ${data.uv} UV`;
+        }
+      });
+    }
+
+    function fetchStats(url, init) {
+      return fetch(url, init).then(function (response) {
+        if (!response.ok) throw new Error(`analytics request failed: ${response.status}`);
+        return response.json();
+      }).then(updatePageStats);
+    }
+
+    function storageGet(storage, key) {
+      try {
+        return storage.getItem(key);
+      } catch {
+        return null;
+      }
+    }
+
+    function storageSet(storage, key, value) {
+      try {
+        storage.setItem(key, value);
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
+    function storageRemove(storage, key) {
+      try {
+        storage.removeItem(key);
+      } catch {
+        // Storage may be unavailable in privacy-restricted contexts.
+      }
+    }
+
+    const lastTrackedAt = Number(storageGet(sessionStorage, throttleKey) || 0);
+    if (lastTrackedAt && now - lastTrackedAt < 60_000) {
+      fetchStats(`/api/analytics?page=${encodeURIComponent(page)}`).catch(function () {
+        // Page statistics are optional and must not affect navigation.
+      });
+      return;
+    }
+
+    let visitorId = storageGet(localStorage, 'visitor_id');
+    if (!visitorId || !uuidV4.test(visitorId)) {
+      if (typeof crypto.randomUUID !== 'function') return;
+      visitorId = crypto.randomUUID();
+      storageSet(localStorage, 'visitor_id', visitorId);
+    }
+
+    storageSet(sessionStorage, throttleKey, String(now));
+
+    fetchStats('/api/analytics', {
+      method: 'POST',
+      credentials: 'same-origin',
+      keepalive: true,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ page, visitorId }),
+    })
+      .catch(function () {
+        storageRemove(sessionStorage, throttleKey);
+      });
+  })();
+</script>

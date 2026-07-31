@@ -1,0 +1,12 @@
+# Local-only D1 configuration used by pnpm dev:analytics.
+# The synthetic ID is intentional and does not reference a Cloudflare account.
+# Production bindings remain configured in the Cloudflare Pages Dashboard.
+name = "github-blog-local"
+pages_build_output_dir = "dist"
+compatibility_date = "2026-07-28"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "github-blog-local"
+database_id = "11111111-1111-4111-8111-111111111111"
+migrations_dir = "migrations"

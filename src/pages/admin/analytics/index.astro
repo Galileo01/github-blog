@@ -1,0 +1,34 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import AnalyticsAdminHeader from './_components/AnalyticsAdminHeader.astro';
+import AnalyticsDistribution from './_components/AnalyticsDistribution.astro';
+import AnalyticsLoginForm from './_components/AnalyticsLoginForm.astro';
+import AnalyticsPopularTable from './_components/AnalyticsPopularTable.astro';
+import AnalyticsSummary from './_components/AnalyticsSummary.astro';
+import AnalyticsTimeRange from './_components/AnalyticsTimeRange.astro';
+import AnalyticsTrendChart from './_components/AnalyticsTrendChart.astro';
+---
+
+<BaseLayout title="访问统计 — Mark" description="博客访问统计后台">
+  <section class="py-8">
+    <AnalyticsAdminHeader />
+
+    <p id="admin-status" class="text-sm text-muted-foreground">正在加载…</p>
+
+    <AnalyticsLoginForm />
+
+    <div id="admin-dashboard" class="hidden space-y-8">
+      <AnalyticsTimeRange />
+      <AnalyticsSummary />
+      <AnalyticsTrendChart />
+      <AnalyticsDistribution />
+      <AnalyticsPopularTable />
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  import { initializeAnalyticsAdmin } from './_lib/analytics-admin.ts';
+
+  initializeAnalyticsAdmin();
+</script>

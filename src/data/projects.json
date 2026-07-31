@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-07-27T12:18:46.042Z",
+  "fetchedAt": "2026-07-31T02:14:48.160Z",
   "totalProjects": 56,
   "totalStars": 26,
   "totalForks": 4,
@@ -107,6 +107,18 @@
       "createdAt": "2020-06-15T12:22:42Z"
     },
     {
+      "name": "github-blog",
+      "description": "github-blog",
+      "language": "TypeScript",
+      "stars": 1,
+      "forks": 0,
+      "topics": [],
+      "pinned": true,
+      "url": "https://github.com/Galileo01/github-blog",
+      "updatedAt": "2026-07-27T12:27:15Z",
+      "createdAt": "2026-06-30T03:10:26Z"
+    },
+    {
       "name": "skystrike",
       "description": "一款在终端中还原经典街机射击游戏 雷电 的作品，使用 Rust 编写。操控战斗机在滚动星空中躲避敌方飞机。",
       "language": "Rust",
@@ -117,18 +129,6 @@
       "url": "https://github.com/Galileo01/skystrike",
       "updatedAt": "2026-07-27T02:58:58Z",
       "createdAt": "2026-07-20T01:31:08Z"
-    },
-    {
-      "name": "github-blog",
-      "description": "github-blog",
-      "language": "TypeScript",
-      "stars": 1,
-      "forks": 0,
-      "topics": [],
-      "pinned": true,
-      "url": "https://github.com/Galileo01/github-blog",
-      "updatedAt": "2026-07-26T02:13:31Z",
-      "createdAt": "2026-06-30T03:10:26Z"
     },
     {
       "name": "rust_practice",
