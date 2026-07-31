@@ -168,14 +168,17 @@ pnpm dev:analytics
 | `ADMIN_PASSWORD` | 加密变量 | 后台登录密码 |
 | `ADMIN_SESSION_SECRET` | 加密变量 | 至少 32 个随机字符的会话签名密钥 |
 
-发布工作流会在部署代码前自动执行：
+发布工作流会根据 GitHub Secret `CLOUDFLARE_D1_DATABASE_ID` 生成一个仅存在于
+Actions runner 的临时 Wrangler 配置，再在部署代码前自动执行：
 
 ```bash
-pnpm dlx wrangler@4.114.0 d1 migrations apply github-blog --remote
+pnpm dlx wrangler@4.114.0 d1 migrations apply github-blog --remote \
+  --config wrangler.d1.ci.json
 ```
 
-该步骤使用独立的 `CLOUDFLARE_D1_API_TOKEN`；migration 失败时不会继续部署。
-需要人工执行时也可以使用同一命令。
+临时配置只用于定位远程 D1 和 migration 目录，不会成为 Pages 生产配置源，也
+不会提交到仓库。该步骤使用独立的 `CLOUDFLARE_D1_API_TOKEN`；migration
+失败时不会继续部署。
 
 还必须在 Cloudflare 中为 `POST /api/analytics` 配置速率限制，并为
 `POST /api/admin/login` 配置更严格的独立规则。服务端一分钟去重不能替代
@@ -199,8 +202,13 @@ pnpm dlx wrangler@4.114.0 d1 migrations apply github-blog --remote
 | `CLOUDFLARE_API_TOKEN` | Cloudflare API 令牌（上一步获取） | ✅ |
 | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare 账号 ID | ✅ |
 | `CLOUDFLARE_D1_API_TOKEN` | 独立的 D1 migration 令牌，授予 D1 Edit | ✅ |
+| `CLOUDFLARE_D1_DATABASE_ID` | `github-blog` 生产 D1 的 UUID，用于生成临时 migration 配置 | ✅ |
 
 > `GITHUB_TOKEN` 是 GitHub Actions 自动注入的，你不需要手动创建。如果要在本地测试 Pinned 抓取，可以在本地环境变量中设置自己的 GitHub Token（40 位 fine-grained PAT）。
+>
+> `CLOUDFLARE_D1_DATABASE_ID` 可在 Cloudflare Dashboard 的
+> **D1 SQL database → github-blog** 详情页复制。它是数据库 UUID，不是数据库
+> 名称 `github-blog`，也不是 binding 名称 `DB`。
 
 仓库还需要建立名为 `production` 的 GitHub Environment。需要人工发布审批时，
 在该 Environment 中配置 required reviewers。

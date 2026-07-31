@@ -71,13 +71,18 @@ jobs:
       - name: Run unit, build and local D1 integration tests
         run: pnpm verify
 
+      - name: Create temporary D1 migration configuration
+        env:
+          CLOUDFLARE_D1_DATABASE_ID: ${{ secrets.CLOUDFLARE_D1_DATABASE_ID }}
+        run: node scripts/create-d1-migration-config.js wrangler.d1.ci.json
+
       - name: Apply production D1 migrations
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_D1_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: "4.114.0"
-          command: d1 migrations apply github-blog --remote
+          command: d1 migrations apply github-blog --remote --config wrangler.d1.ci.json
 
       - name: Deploy to Cloudflare Pages
         id: deploy

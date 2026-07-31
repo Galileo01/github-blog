@@ -172,9 +172,16 @@ GitHub Actions 需要：
 | `CLOUDFLARE_ACCOUNT_ID` | 指定 Cloudflare 账号 |
 | `CLOUDFLARE_API_TOKEN` | Cloudflare Pages 部署权限 |
 | `CLOUDFLARE_D1_API_TOKEN` | 独立的 D1 Edit 权限，仅用于 migration |
+| `CLOUDFLARE_D1_DATABASE_ID` | 生产 D1 UUID，用于生成临时 Wrangler migration 配置 |
 
 GitHub 仓库还应创建名为 `production` 的 Environment，并按需要配置人工审批。
 没有配置 reviewer 时，`environment: production` 只提供隔离，不会自动产生审批。
+
+仓库不提交生产 Wrangler 配置。部署任务会校验
+`CLOUDFLARE_D1_DATABASE_ID` 是 UUID，并生成被 Git 忽略的
+`wrangler.d1.ci.json`；`d1 migrations apply` 必须显式传入该临时配置。
+该 UUID 从 Cloudflare Dashboard 的生产 `github-blog` D1 详情页复制，不要填写
+数据库名称或 `DB` binding 名称。
 
 GitHub Actions + Wrangler 是本项目唯一发布入口。如果 Pages 项目已经连接 Git，
 在 Cloudflare Dashboard 的 **Settings → Builds → Branch control** 中：

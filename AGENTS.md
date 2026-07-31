@@ -33,7 +33,8 @@ GitHub API → fetch-github.js → github-stats.json
 8. **静态站点 + 动态边缘接口**：Astro 继续静态构建，访问统计仅由根目录
    `functions/` 中的 Pages Functions 处理
 9. **Dashboard 是生产配置源**：不提交 `wrangler.toml`；D1 binding 和后台
-   secrets 在 Cloudflare Pages Dashboard 配置
+   secrets 在 Cloudflare Pages Dashboard 配置。生产 migration 由 GitHub
+   Actions 根据 D1 database ID 生成临时 Wrangler 配置执行
 10. **最小化统计数据**：不保存 IP、User-Agent 或完整 referrer；服务端按
     pathname、匿名 UUID 和 Unix 分钟唯一去重
 
@@ -205,7 +206,8 @@ flowchart TD
   自动生产和 preview 部署必须关闭，避免 push 绕过 migration 与 smoke 门禁
 - 生产 Pages 项目必须绑定名为 `DB` 的 D1 数据库
 - 发布 job 使用 GitHub `production` Environment；审批规则在 GitHub 设置
-- 部署前运行 `pnpm verify`，再使用独立 D1 Token 自动执行远端 migration
+- 部署前运行 `pnpm verify`，再使用独立 D1 Token 和由 D1 database ID
+  生成的临时 Wrangler 配置自动执行远端 migration
 - 部署后必须对实际 deployment URL 执行 smoke test
 - `ADMIN_PASSWORD` 和 `ADMIN_SESSION_SECRET` 必须作为 Pages 加密变量配置
 - `POST /api/analytics` 和 `POST /api/admin/login` 必须配置独立的 Cloudflare
@@ -219,6 +221,7 @@ flowchart TD
 | `GITHUB_TOKEN` | GitHub API 认证（GraphQL 获取 Pinned） | GitHub Actions 自动注入 |
 | `CLOUDFLARE_API_TOKEN` | Cloudflare Pages 部署 | GitHub Secrets |
 | `CLOUDFLARE_D1_API_TOKEN` | 生产 D1 migration，独立 D1 Edit 权限 | GitHub Secrets |
+| `CLOUDFLARE_D1_DATABASE_ID` | 生产 D1 UUID，用于临时 migration 配置 | GitHub Secrets |
 | `CLOUDFLARE_ACCOUNT_ID` | Wrangler Action 账号定位 | GitHub Secrets |
 | `DB` | D1 访问统计 binding | Cloudflare Pages Dashboard |
 | `ADMIN_PASSWORD` | 统计后台登录密码 | Pages 加密变量 / 本地环境变量 |
