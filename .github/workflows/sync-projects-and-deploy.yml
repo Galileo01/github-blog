@@ -4,7 +4,20 @@ on:
   workflow_dispatch:
 
 jobs:
+  validate-production-ref:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require the production branch
+        env:
+          CURRENT_REF: ${{ github.ref }}
+        run: |
+          if [ "$CURRENT_REF" != "refs/heads/master" ]; then
+            echo "::error::Production deployment must run from master; received $CURRENT_REF"
+            exit 1
+          fi
+
   sync:
+    needs: validate-production-ref
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -71,13 +84,18 @@ jobs:
       - name: Run unit, build and local D1 integration tests
         run: pnpm verify
 
+      - name: Create temporary D1 migration configuration
+        env:
+          CLOUDFLARE_D1_DATABASE_ID: ${{ secrets.CLOUDFLARE_D1_DATABASE_ID }}
+        run: node scripts/create-d1-migration-config.js wrangler.d1.ci.json
+
       - name: Apply production D1 migrations
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_D1_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: "4.114.0"
-          command: d1 migrations apply github-blog --remote
+          command: d1 migrations apply github-blog --remote --config wrangler.d1.ci.json
 
       - name: Deploy to Cloudflare Pages
         id: deploy
@@ -86,7 +104,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: "4.114.0"
-          command: pages deploy dist/ --project-name=github-blog
+          command: pages deploy dist/ --project-name=github-blog --branch=master
 
       - name: Smoke test deployment
         env:
