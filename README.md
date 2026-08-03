@@ -218,7 +218,11 @@ pnpm dlx wrangler@4.114.0 d1 migrations apply github-blog --remote \
 1. 前往 GitHub 仓库 → **Actions** 页
 2. 点击 **Sync GitHub Projects & Deploy**
 3. 点击 **Run workflow**
-4. 点击 **Run**
+4. Branch 选择 `master`
+5. 点击 **Run**
+
+该工作流只允许从 `master` 发布；选择其他分支会在同步数据、migration 和部署前
+立即失败。功能分支由 `Validate` 工作流验证，不直接发布到生产环境。
 
 工作流会：
 1. 拉取最新 GitHub 数据
@@ -254,7 +258,8 @@ sequenceDiagram
 1. 打开 GitHub 仓库的 **Actions** 页
 2. 在左侧选择 **Sync GitHub Projects & Deploy**
 3. 点击右上角 **Run workflow**
-4. 点击 **Run workflow**
+4. Branch 选择 `master`
+5. 点击 **Run workflow**
 
 ### 方式二：本地生成 + 推送
 

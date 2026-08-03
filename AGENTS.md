@@ -199,6 +199,8 @@ flowchart TD
 ## 部署
 
 - `.github/workflows/sync-projects-and-deploy.yml` 通过 `workflow_dispatch` 手动触发
+- 生产工作流只允许在 `master` 运行，Pages 部署必须显式指定
+  `--branch=master`；功能分支不得借该工作流创建生产或 Preview 部署
 - 工作流抓取 GitHub、更新 `src/data/projects.json` 并提交生成结果
 - 工作流提交生成结果后，使用 `cloudflare/wrangler-action@v3` 部署
 - 无 `wrangler.toml`，配置在 Cloudflare Dashboard 中

@@ -4,7 +4,20 @@ on:
   workflow_dispatch:
 
 jobs:
+  validate-production-ref:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require the production branch
+        env:
+          CURRENT_REF: ${{ github.ref }}
+        run: |
+          if [ "$CURRENT_REF" != "refs/heads/master" ]; then
+            echo "::error::Production deployment must run from master; received $CURRENT_REF"
+            exit 1
+          fi
+
   sync:
+    needs: validate-production-ref
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -91,7 +104,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: "4.114.0"
-          command: pages deploy dist/ --project-name=github-blog
+          command: pages deploy dist/ --project-name=github-blog --branch=master
 
       - name: Smoke test deployment
         env:

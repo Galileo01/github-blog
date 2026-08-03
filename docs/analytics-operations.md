@@ -201,6 +201,10 @@ Cloudflare 还必须配置：
 
 手动运行 `Sync GitHub Projects & Deploy` 后：
 
+- Branch 必须选择 `master`；其他 ref 会在任何同步或生产操作前明确失败。
+- Pages 部署显式传入 `--branch=master`，确保 smoke test 命中 Production binding，
+  而不是缺少生产 D1 binding 的 Preview 环境。
+
 ```text
 同步 GitHub 数据
   → pnpm check
