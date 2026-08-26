@@ -191,7 +191,13 @@
 
   /* Heading anchor offset */
   .prose h2, .prose h3, .prose h4 {
-    @apply scroll-mt-20;
+    scroll-margin-top: 8rem;
+  }
+
+  @media (min-width: 640px) {
+    .prose h2, .prose h3, .prose h4 {
+      scroll-margin-top: 6rem;
+    }
   }
 
   /* Mermaid diagram wrapper */

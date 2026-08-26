@@ -1,0 +1,121 @@
+---
+import type { MarkdownHeading } from 'astro';
+
+interface Props {
+  headings: MarkdownHeading[];
+  variant: 'desktop' | 'mobile';
+}
+
+const { headings, variant } = Astro.props;
+const items = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
+const isDesktop = variant === 'desktop';
+---
+
+{items.length >= 2 && (
+  isDesktop ? (
+    <aside class="hidden min-w-0 xl:block">
+      <nav
+        class="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto pr-2"
+        aria-label="目录"
+        data-article-heading-navigation
+      >
+        <p class="mb-3 text-sm font-semibold tracking-tight">目录</p>
+        <ol class="space-y-1">
+          {items.map((heading, index) => (
+            <li>
+              <a
+                href={`#${heading.slug}`}
+                data-heading-navigation-link
+                data-heading-id={heading.slug}
+                aria-current={index === 0 ? 'location' : undefined}
+                class:list={[
+                  'block border-l-2 border-border py-1.5 text-sm leading-5 text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground aria-[current=location]:border-primary aria-[current=location]:font-medium aria-[current=location]:text-foreground',
+                  heading.depth === 3 ? 'pl-6' : 'pl-3',
+                ]}
+              >
+                {heading.text}
+              </a>
+            </li>
+          ))}
+        </ol>
+      </nav>
+    </aside>
+  ) : (
+    <details
+      class="group sticky top-16 z-40 mb-8 rounded-md border border-border bg-background/95 shadow-sm backdrop-blur xl:hidden"
+      data-article-heading-navigation
+    >
+      <summary class="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-4 py-2.5 text-sm [&::-webkit-details-marker]:hidden">
+        <span class="inline-flex shrink-0 items-center gap-2 font-semibold">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M3 12h.01" />
+            <path d="M3 18h.01" />
+            <path d="M3 6h.01" />
+            <path d="M8 12h13" />
+            <path d="M8 18h13" />
+            <path d="M8 6h13" />
+          </svg>
+          <span>目录</span>
+        </span>
+        <span class="flex min-w-0 items-center gap-2 text-muted-foreground">
+          <span class="truncate text-xs" data-current-heading-label>{items[0].text}</span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="shrink-0 transition-transform group-open:rotate-180"
+            aria-hidden="true"
+          >
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </span>
+      </summary>
+      <nav
+        class="absolute inset-x-0 top-[calc(100%+0.5rem)] max-h-[60dvh] overflow-y-auto rounded-md border border-border bg-popover px-3 py-3 text-popover-foreground shadow-lg"
+        aria-label="目录"
+      >
+        <ol class="space-y-1">
+          {items.map((heading, index) => (
+            <li>
+              <a
+                href={`#${heading.slug}`}
+                data-heading-navigation-link
+                data-heading-id={heading.slug}
+                aria-current={index === 0 ? 'location' : undefined}
+                class:list={[
+                  'block border-l-2 border-border py-1.5 text-sm leading-5 text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground aria-[current=location]:border-primary aria-[current=location]:font-medium aria-[current=location]:text-foreground',
+                  heading.depth === 3 ? 'pl-6' : 'pl-3',
+                ]}
+              >
+                {heading.text}
+              </a>
+            </li>
+          ))}
+        </ol>
+      </nav>
+    </details>
+  )
+)}
+
+<script>
+  import { initializeArticleHeadingNavigation } from '../lib/article-heading-navigation';
+
+  initializeArticleHeadingNavigation();
+</script>

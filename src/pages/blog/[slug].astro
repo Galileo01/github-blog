@@ -4,51 +4,62 @@ import { getCollection, render } from 'astro:content';
 import { Card, CardContent } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
 import MermaidRenderer from '../../components/MermaidRenderer';
+import ArticleHeadingNavigation from '../../components/ArticleHeadingNavigation.astro';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
-  return posts.map((post) => ({
-    params: { slug: post.id.replace(/\.md$/, '') },
-    props: { post },
-  }));
+  return posts
+    .filter((post) => import.meta.env.DEV || !post.data.draft)
+    .map((post) => ({
+      params: { slug: post.id.replace(/\.md$/, '') },
+      props: { post },
+    }));
 }
 
 const { post } = Astro.props;
-const { Content } = await render(post);
+const { Content, headings } = await render(post);
+const tocHeadings = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
 ---
 
-<BaseLayout title={`${post.data.title} — Mark`} description={post.data.description}>
-  <article class="py-8">
-    <header class="mb-8">
-      <div class="flex flex-wrap gap-2 mb-4">
-        {post.data.tags?.map((tag: string) => (
-          <Badge variant="secondary">{tag}</Badge>
-        ))}
-      </div>
-      <h1 class="text-3xl font-bold tracking-tight sm:text-4xl">{post.data.title}</h1>
-      <div class="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
-        <time>
-          {new Date(post.data.date).toLocaleDateString('zh-CN', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          })}
-        </time>
-        <span>·</span>
-        <span>{post.data.description}</span>
-        <span>·</span>
-        <span
-          data-analytics-page-stats
-          data-page={`/blog/${post.id.replace(/\.md$/, '')}`}
-        >
-          -- PV / -- UV
-        </span>
-      </div>
-    </header>
+<BaseLayout title={`${post.data.title} — Mark`} description={post.data.description} contentWidth="wide">
+  <div class="xl:grid xl:grid-cols-[minmax(0,48rem)_14rem] xl:justify-center xl:gap-12">
+    <article class="mx-auto min-w-0 max-w-3xl py-8 xl:mx-0 xl:max-w-none">
+      <header class="mb-8">
+        <div class="flex flex-wrap gap-2 mb-4">
+          {post.data.draft && <Badge variant="destructive">草稿</Badge>}
+          {post.data.tags?.map((tag: string) => (
+            <Badge variant="secondary">{tag}</Badge>
+          ))}
+        </div>
+        <h1 class="text-3xl font-bold tracking-tight sm:text-4xl">{post.data.title}</h1>
+        <div class="mt-4 flex flex-col gap-1 text-sm text-muted-foreground sm:flex-row sm:items-start sm:gap-2">
+          <time class="shrink-0 whitespace-nowrap">
+            {new Date(post.data.date).toLocaleDateString('zh-CN', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
+          </time>
+          <span class="hidden sm:inline" aria-hidden="true">·</span>
+          <span class="min-w-0 sm:flex-1">{post.data.description}</span>
+          <span class="hidden sm:inline" aria-hidden="true">·</span>
+          <span
+            class="shrink-0 whitespace-nowrap"
+            data-analytics-page-stats
+            data-page={`/blog/${post.id.replace(/\.md$/, '')}`}
+          >
+            -- PV / -- UV
+          </span>
+        </div>
+      </header>
 
-    <div class="prose prose-neutral dark:prose-invert max-w-none">
-      <Content />
-      <MermaidRenderer client:idle />
-    </div>
-  </article>
+      <ArticleHeadingNavigation headings={tocHeadings} variant="mobile" />
+
+      <div class="prose prose-neutral dark:prose-invert max-w-none">
+        <Content />
+        <MermaidRenderer client:idle />
+      </div>
+    </article>
+    <ArticleHeadingNavigation headings={tocHeadings} variant="desktop" />
+  </div>
 </BaseLayout>

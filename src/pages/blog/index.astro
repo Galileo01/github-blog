@@ -5,7 +5,7 @@ import BlogCard from '../../components/BlogCard.astro';
 
 const allPosts = await getCollection('blog');
 const publishedPosts = allPosts
-  .filter((post) => !post.data.draft)
+  .filter((post) => import.meta.env.DEV || !post.data.draft)
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
 const allTags = [...new Set(publishedPosts.flatMap((post) => post.data.tags))];
