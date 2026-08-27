@@ -5,8 +5,10 @@ import ProjectsSection from '../components/ProjectsSection.astro';
 import BlogCard from '../components/BlogCard.astro';
 
 const recentPosts = await getCollection('blog');
-recentPosts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
-const latestPosts = recentPosts.slice(0, 3);
+const latestPosts = recentPosts
+  .filter((post) => import.meta.env.DEV || !post.data.draft)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 3);
 ---
 
 <BaseLayout title="Mark — 技术与思考" description="个人博客，分享技术探索与项目实践">
