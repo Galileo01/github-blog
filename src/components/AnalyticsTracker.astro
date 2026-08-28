@@ -11,9 +11,10 @@
     const now = Date.now();
 
     function updatePageStats(data) {
+      if (!Number.isFinite(data.pv)) return;
       document.querySelectorAll('[data-analytics-page-stats]').forEach(function (element) {
         if (element.getAttribute('data-page') === data.page) {
-          element.textContent = `${data.pv} PV / ${data.uv} UV`;
+          element.textContent = String(data.pv);
         }
       });
     }

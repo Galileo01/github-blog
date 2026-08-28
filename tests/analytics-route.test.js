@@ -27,11 +27,11 @@ class AnalyticsDb {
       },
       async first() {
         assert.match(sql, /count\(\*\) AS pv/);
+        assert.doesNotMatch(sql, /DISTINCT visitor_id/);
         const [page] = this.values;
         const rows = database.rows.filter((row) => row.page === page);
         return {
           pv: rows.length,
-          uv: new Set(rows.map((row) => row.visitorId)).size,
         };
       },
     };
@@ -57,7 +57,6 @@ test('analytics route records once per minute bucket and returns current stats',
     recorded: true,
     page: '/blog/hello-world',
     pv: 1,
-    uv: 1,
   });
 
   const duplicate = await post({ page: '/blog/hello-world', visitorId }, db);
@@ -66,7 +65,6 @@ test('analytics route records once per minute bucket and returns current stats',
     recorded: false,
     page: '/blog/hello-world',
     pv: 1,
-    uv: 1,
   });
 });
 
@@ -99,7 +97,6 @@ test('analytics GET validates page and reports missing DB binding', async () => 
   assert.deepEqual(await valid.json(), {
     page: '/blog/hello-world',
     pv: 0,
-    uv: 0,
   });
 
   const invalid = await onRequest({

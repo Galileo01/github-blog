@@ -1,10 +1,11 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getCollection, render } from 'astro:content';
-import { Card, CardContent } from '../../components/ui/card';
+import { Eye } from 'lucide-react';
 import { Badge } from '../../components/ui/badge';
 import MermaidRenderer from '../../components/MermaidRenderer';
 import ArticleHeadingNavigation from '../../components/ArticleHeadingNavigation.astro';
+import BreadcrumbNavigation from '../../components/BreadcrumbNavigation.astro';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
@@ -19,11 +20,41 @@ export async function getStaticPaths() {
 const { post } = Astro.props;
 const { Content, headings } = await render(post);
 const tocHeadings = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
+const slug = post.id.replace(/\.md$/, '');
+const pagePath = `/blog/${slug}`;
+const breadcrumbItems = [
+  { label: '首页', href: '/' },
+  { label: '博客', href: '/blog' },
+  { label: post.data.title },
+];
 ---
 
 <BaseLayout title={`${post.data.title} — Mark`} description={post.data.description} contentWidth="wide">
+  <script is:inline>
+    const url = new URL(window.location.href);
+    const enteredFromHome = url.searchParams.get('from') === 'home';
+    const restoredFromHome = window.history.state?.articleEntrySource === 'home';
+
+    if (enteredFromHome || restoredFromHome) {
+      document.documentElement.dataset.articleEntrySource = 'home';
+
+      if (enteredFromHome) {
+        url.searchParams.delete('from');
+        window.history.replaceState(
+          { ...window.history.state, articleEntrySource: 'home' },
+          '',
+          `${url.pathname}${url.search}${url.hash}`,
+        );
+      }
+    }
+  </script>
+
   <div class="xl:grid xl:grid-cols-[minmax(0,48rem)_14rem] xl:justify-center xl:gap-12">
     <article class="mx-auto min-w-0 max-w-3xl py-8 xl:mx-0 xl:max-w-none">
+      <div class="mb-6">
+        <BreadcrumbNavigation items={breadcrumbItems} />
+      </div>
+
       <header class="mb-8">
         <div class="flex flex-wrap gap-2 mb-4">
           {post.data.draft && <Badge variant="destructive">草稿</Badge>}
@@ -43,12 +74,10 @@ const tocHeadings = headings.filter((heading) => heading.depth === 2 || heading.
           <span class="hidden sm:inline" aria-hidden="true">·</span>
           <span class="min-w-0 sm:flex-1">{post.data.description}</span>
           <span class="hidden sm:inline" aria-hidden="true">·</span>
-          <span
-            class="shrink-0 whitespace-nowrap"
-            data-analytics-page-stats
-            data-page={`/blog/${post.id.replace(/\.md$/, '')}`}
-          >
-            -- PV / -- UV
+          <span class="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap" title="浏览量">
+            <Eye size={16} aria-hidden="true" />
+            <span data-analytics-page-stats data-page={pagePath}>--</span>
+            <span class="sr-only">次浏览</span>
           </span>
         </div>
       </header>
@@ -63,3 +92,9 @@ const tocHeadings = headings.filter((heading) => heading.depth === 2 || heading.
     <ArticleHeadingNavigation headings={tocHeadings} variant="desktop" />
   </div>
 </BaseLayout>
+
+<style is:global>
+  html[data-article-entry-source='home'] [data-breadcrumb-ancestor='/blog'] {
+    display: none;
+  }
+</style>
