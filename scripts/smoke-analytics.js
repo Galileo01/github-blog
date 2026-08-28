@@ -35,7 +35,7 @@ const analytics = await retry('/api/analytics?page=/', 200);
 const analyticsBody = await analytics.json();
 assert.equal(analyticsBody.page, '/');
 assert.equal(Number.isFinite(analyticsBody.pv), true);
-assert.equal(Number.isFinite(analyticsBody.uv), true);
+assert.equal(Object.hasOwn(analyticsBody, 'uv'), false);
 
 await retry('/api/admin/analytics/summary', 401);
 await retry('/api/admin/login', 401, {

@@ -3,11 +3,13 @@ import type { CollectionEntry } from 'astro:content';
 
 interface Props {
   post: CollectionEntry<'blog'>;
+  entrySource?: 'home';
 }
 
-const { post } = Astro.props;
+const { post, entrySource } = Astro.props;
 const { data } = post;
 const slug = post.id.replace(/\.md$/, '');
+const href = `/blog/${slug}/${entrySource === 'home' ? '?from=home' : ''}`;
 const badgeBudget = 4;
 const tagBudget = badgeBudget - (data.draft ? 1 : 0);
 const hasHiddenTags = data.tags.length > tagBudget;
@@ -16,7 +18,7 @@ const hiddenTagCount = data.tags.length - visibleTags.length;
 ---
 
 <article class="group h-full rounded-lg border border-border bg-card p-5 shadow-sm transition-all hover:shadow-md">
-  <a href={`/blog/${slug}/`} class="flex h-full flex-col">
+  <a href={href} class="flex h-full flex-col">
     <div class="mb-3 flex flex-wrap content-start gap-2 sm:min-h-14">
       {data.draft && (
         <span class="inline-flex max-w-[calc(50%-0.25rem)] items-center truncate rounded-full border border-destructive/40 bg-destructive/10 px-2.5 py-0.5 text-xs font-medium text-destructive">

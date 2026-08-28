@@ -1,0 +1,43 @@
+---
+import { ChevronRight } from 'lucide-react';
+
+interface BreadcrumbItem {
+  label: string;
+  href?: string;
+}
+
+interface Props {
+  items: BreadcrumbItem[];
+}
+
+const { items } = Astro.props;
+---
+
+<nav aria-label="面包屑">
+  <ol class="flex min-w-0 items-center gap-1.5 text-sm text-muted-foreground">
+    {items.map((item, index) => {
+      const isCurrentPage = index === items.length - 1;
+      return (
+        <li
+          class:list={['flex min-w-0 items-center gap-1.5', isCurrentPage && 'flex-1']}
+          data-breadcrumb-ancestor={item.href}
+        >
+          {index > 0 && <ChevronRight size={14} className="shrink-0" aria-hidden="true" />}
+          {item.href && !isCurrentPage ? (
+            <a href={item.href} class="shrink-0 transition-colors hover:text-foreground">
+              {item.label}
+            </a>
+          ) : (
+            <span
+              class="truncate text-foreground/80"
+              aria-current={isCurrentPage ? 'page' : undefined}
+              title={item.label}
+            >
+              {item.label}
+            </span>
+          )}
+        </li>
+      );
+    })}
+  </ol>
+</nav>

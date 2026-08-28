@@ -168,7 +168,6 @@ async function verifyApi(baseUrl) {
     recorded: true,
     page: '/blog/hello-world',
     pv: 2,
-    uv: 2,
   });
 
   const duplicate = await request(baseUrl, '/api/analytics', {
@@ -180,12 +179,11 @@ async function verifyApi(baseUrl) {
     recorded: false,
     page: '/blog/hello-world',
     pv: 2,
-    uv: 2,
   });
 
   const pageStats = await request(baseUrl, '/api/analytics?page=/blog/hello-world');
   assert.equal(pageStats.response.status, 200);
-  assert.deepEqual(pageStats.body, { page: '/blog/hello-world', pv: 2, uv: 2 });
+  assert.deepEqual(pageStats.body, { page: '/blog/hello-world', pv: 2 });
 
   const invalidPage = await request(baseUrl, '/api/analytics', {
     method: 'POST',

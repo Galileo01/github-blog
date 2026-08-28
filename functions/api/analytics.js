@@ -3,7 +3,7 @@ import { json, methodNotAllowed, readJsonObject } from '../_shared/http.js';
 
 async function pageStats(db, page) {
   const row = await db.prepare(
-    `SELECT count(*) AS pv, count(DISTINCT visitor_id) AS uv
+    `SELECT count(*) AS pv
      FROM pageviews
      WHERE page = ?`
   ).bind(page).first();
@@ -11,7 +11,6 @@ async function pageStats(db, page) {
   return {
     page,
     pv: numberValue(row?.pv),
-    uv: numberValue(row?.uv),
   };
 }
 
